@@ -27,12 +27,12 @@ export async function getUserById(req, res) {
 }
 // Create a new user
 export async function createUser(req, res) {
-  const { email, first_name, last_name } = req.body;
+  const { email, first_name, last_name, mobile, profile_picture } = req.body;
   if(!email){
     return res.status(400).json({ error: 'Email is required' });
   }
   try {
-    const user = await User.createUser(email, first_name, last_name);
+    const user = await User.createUser(email, first_name, last_name, mobile, profile_picture);
     res.status(201).json(user);
   } catch (err) {
     console.error('Error creating user', err);
@@ -43,8 +43,8 @@ export async function createUser(req, res) {
 export async function updateUser(req, res) {
   try {   
     const { id } = req.params;
-    const { first_name, last_name } = req.body;
-    const user = await User.updateUser(id, first_name, last_name);
+    const { first_name, last_name, mobile, profile_picture } = req.body;
+    const user = await User.updateUser(id, first_name, last_name, mobile, profile_picture);
     if (!user) {
       return res.status(404).json({ error: 'User does not exist' });
     }

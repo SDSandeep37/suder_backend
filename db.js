@@ -25,6 +25,8 @@ export async function initDB() {
       email TEXT UNIQUE NOT NULL,
       first_name TEXT,
       last_name TEXT,
+      mobile TEXT,
+      profile_picture TEXT,
       created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
       updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     );

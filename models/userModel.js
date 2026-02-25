@@ -21,15 +21,15 @@ export async function getUserById(id) {
 }
 
 //Function to create a new user in the database
-export async function createUser(email, first_name, last_name) {
+export async function createUser(email, first_name, last_name, mobile, profile_picture) {
   try {
   const currentTime = new Date().toLocaleString('en-GB', { timeZone: 'Asia/Kolkata' });
   // return currentTime;
   const result = await pool.query(
-    `INSERT INTO users (email, first_name, last_name, created_at, updated_at)
-     VALUES ($1, $2, $3, $4, $4)
+    `INSERT INTO users (email, first_name, last_name, mobile, profile_picture, created_at, updated_at)
+     VALUES ($1, $2, $3, $4, $5, $6, $7)
      RETURNING *`,
-    [email, first_name, last_name, currentTime]
+    [email, first_name, last_name, mobile, profile_picture, currentTime, currentTime]
 
   );
   return result.rows[0];
@@ -39,12 +39,12 @@ export async function createUser(email, first_name, last_name) {
 }
 
 //Function to update a user in the database
-export async function updateUser(id,  first_name, last_name) {
+export async function updateUser(id,  first_name, last_name, mobile, profile_picture) {
   try{  
   const currentTime = new Date().toLocaleString('en-GB', { timeZone: 'Asia/Kolkata' });
   const result = await pool.query(
-    `UPDATE users SET  first_name = $1, last_name = $2, updated_at = $3 WHERE id = $4 RETURNING *`,
-    [first_name, last_name, currentTime, id]
+    `UPDATE users SET  first_name = $1, last_name = $2, mobile = $3, profile_picture = $4, updated_at = $5 WHERE id = $6 RETURNING *`,
+    [first_name, last_name, mobile, profile_picture, currentTime, id]
   );
   return result.rows[0];
   } catch (error) {
