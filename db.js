@@ -23,10 +23,11 @@ export async function initDB() {
     CREATE TABLE IF NOT EXISTS users (
       id SERIAL PRIMARY KEY,
       email TEXT UNIQUE NOT NULL,
+      clerk_id TEXT UNIQUE NOT NULL,
       first_name TEXT,
       last_name TEXT,
       mobile TEXT,
-      profile_picture TEXT,
+      profile_pic TEXT,
       created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
       updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     );
