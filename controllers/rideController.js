@@ -1,5 +1,6 @@
 import * as Ride from '../models/rideModel.js';
-
+import { calculateFare } from '../utils/fare.js';
+import { calculateDistance } from '../utils/distance.js';
 //Get all rides
 export const getAllRides = async (req, res) => {
     try {
@@ -31,12 +32,19 @@ export const getRideById = async (req, res) => {
 
 // Create a new ride
 export const createRide = async (req, res) => {
-  const { driver_id, rider_id, origin, destination, status } = req.body;
-  if (!driver_id || !rider_id || !origin || !destination || !status) {
+  const {pickup,dropoff,ride_type,rider_id} = req.body; 
+  if(!pickup || !dropoff){
+    return res.status(400).json({ error: "Pickup and dropoff are required" });
+  }
+  const { pickup_address,pickup_lat,pickup_lng} =pickup;
+  const {dropoff_address,dropoff_lat,dropoff_lng } =dropoff;
+  if (!rider_id ||!pickup_address || !pickup_lat ||!pickup_lng ||!dropoff_address ||!dropoff_lat ||!dropoff_lng ||!ride_type ) {
     return res.status(400).json({ error: 'All fields are required' });
   }
   try {
-    const newRide = await Ride.createRide(driver_id, rider_id, origin, destination, status);
+    const distance =  calculateDistance(pickup_lat,pickup_lng,dropoff_lat,dropoff_lng);
+    const fare = calculateFare(distance);
+    const newRide = await Ride.createRide(rider_id,pickup_address,pickup_lat,pickup_lng,dropoff_address,dropoff_lat,dropoff_lng,ride_type,distance,fare);
     res.status(201).json(newRide);
   } catch (err) {
     console.error('Error creating ride:', err);
@@ -50,12 +58,12 @@ export const updateRide = async (req, res) => {
   if (!id) {
     return res.status(400).json({ error: 'Ride ID is required' });
   }
-  const { origin, destination, status } = req.body;
-  if (!origin || !destination || !status) {
+  const { driver_id, rider_id, status,pickup_address,pickup_lat,pickup_lng,dropoff_address,dropoff_lat,dropoff_lng,ride_type } = req.body;
+  if (!driver_id ||!rider_id ||!status ||!pickup_address || !pickup_lat ||!pickup_lng ||!dropoff_address ||!dropoff_lat ||!dropoff_lng ||!ride_type) {
     return res.status(400).json({ error: 'All fields are required' });
   }
   try {
-    const updatedRide = await Ride.updateRide(id, origin, destination, status);
+    const updatedRide = await Ride.updateRide(id, driver_id, rider_id, status,pickup_address,pickup_lat,pickup_lng,dropoff_address,dropoff_lat,dropoff_lng,ride_type);
     if (!updatedRide) {
       return res.status(404).json({ error: 'Ride not found' });
     }
