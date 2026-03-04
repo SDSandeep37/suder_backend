@@ -4,6 +4,7 @@ import { initDB } from './db.js';
 import userRoutes from './routes/userRoutes.js';
 import rideRoutes from './routes/rideRoutes.js';
 import paymentRoutes from './routes/paymentsRoutes.js';
+import driverRoutes from "./routes/driverRoutes.js";
 
 const app = express();
 app.use('/uploads',express.static('uploads'))
@@ -21,6 +22,8 @@ app.use('/api/users', userRoutes);
 app.use('/api/rides', rideRoutes);
 // Use payment routes
 app.use('/api/payments', paymentRoutes);
+// use driver routes
+app.use('/api/drivers',driverRoutes)
 
 // Initialize the database and start the server
 initDB().then(() => {

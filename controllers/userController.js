@@ -2,6 +2,7 @@ import * as User from "../models/userModel.js";
 import path from "path";
 import fs from 'fs';
 import multer from "multer";
+import { checkDriver } from "../models/driverModel.js";
 
 // sync function to check if user exists by email
 export async function syncUserWithDatabase(req, res) {
@@ -12,7 +13,19 @@ export async function syncUserWithDatabase(req, res) {
   }
   try {
     const user = await User.syncUserData(clerk_id, email, first_name, last_name, mobile, profile_pic);
-    res.status(201).json(user);
+    const driver = await checkDriver(user.id);
+    if(!driver){
+      res.status(201).json({
+        ...user,
+        isDriver:false
+      });
+    }
+     res.status(201).json({
+        ...user,
+        isDriver:true,
+        details:driver
+
+      });
   } catch (err) {
     console.error('Error syncing user data', err);
     res.status(500).json({ error: `Internal Server Error: ${err.message}` });

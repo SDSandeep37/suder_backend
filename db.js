@@ -35,7 +35,7 @@ export async function initDB() {
   await pool.query(`
     CREATE TABLE IF NOT EXISTS rides  (
       id SERIAL PRIMARY KEY,
-      driver_id INT REFERENCES users(id),
+      driver_id INT REFERENCES drivers(id),
       rider_id INT REFERENCES users(id),
       pickup_address TEXT NOT NULL,
       pickup_lat DOUBLE PRECISION NOT NULL,
@@ -47,6 +47,8 @@ export async function initDB() {
       status TEXT DEFAULT 'REQUESTED',
       distance_km DECIMAL(10,2),
       fare DECIMAL(10,2),
+      start_time TIMESTAMP,
+      end_time TIMESTAMP,
       created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
       updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     );
@@ -62,6 +64,21 @@ export async function initDB() {
       updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 
       );
+  `);
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS drivers (
+    id SERIAL PRIMARY KEY,
+    user_id INTEGER UNIQUE REFERENCES users(id) ON DELETE CASCADE,
+    vehicle_number TEXT NOT NULL,
+    vehicle_type TEXT NOT NULL,
+    license_number TEXT NOT NULL,
+    is_verified BOOLEAN DEFAULT false,
+    is_available BOOLEAN DEFAULT false,
+    current_lat DECIMAL(10,8),
+    current_lng DECIMAL(11,8),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    );
   `);
   console.log('Database initialized');
 };
