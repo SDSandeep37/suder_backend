@@ -145,13 +145,13 @@ export const completeRide = async (req, res) => {
 // Canceling a ride
 export const cancelRide = async (req, res) => {
   const { id } = req.params;
-
+  const { user_id } = req.body;
   if (!id) {
     return res.status(400).json({ error: "Ride ID is required" });
   }
 
   try {
-    const ride = await Ride.cancelRide(id);
+    const ride = await Ride.cancelRide(id,user_id);
 
     if (!ride) {
       return res.status(400).json({ error: "Ride cannot be cancelled" });
@@ -210,9 +210,61 @@ export const getRidesByDriverContoller = async (req, res) => {
     if (!ride) {
       return res.status(404).json({ error: 'Rides not found' });
     }
-    res.json(ride);
+    res.status(200).json({
+      totalRides:Number(ride.length),
+      rideDetails:ride
+    });
   } catch (err) {
     console.error('Error fetching rides:', err);
     res.status(500).json({ error: 'Failed to fetch rides' });
+  }
+};
+
+
+
+export const getDriverDashboardController = async (req, res) => {
+  try {
+    const driver_id = Number(req.params.id);
+
+    const dashboard = await Ride.getDriverDashboard(driver_id);
+
+    res.status(200).json(dashboard);
+
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Internal Server Error" });
+  }
+};
+
+//Get all recent trips
+export const getRecentTripsController = async (req, res) => {
+  const driver_id = Number(req.params.id);
+  try {
+    const rides = await Ride.getAllRecentTrips(driver_id);
+    if(rides.length ===0){
+      res.status(200).json([]);
+    }
+    res.json(rides);
+  } catch (err) {
+    console.error('Error fetching rides:', err);
+    res.status(500).json({ error: 'Failed to fetch rides' });
+  }
+};
+
+
+export const getDriverRidesAllDashboardController = async (req, res) => {
+  try {
+
+    const driver_id = Number(req.params.id);
+
+    const data = await Ride.getDriverRidesAllDashboard(driver_id);
+
+    res.status(200).json(data);
+
+  } catch (error) {
+    res.status(500).json({
+      error: "Failed to fetch rides",
+      message: error.message
+    });
   }
 };

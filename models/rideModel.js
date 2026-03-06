@@ -134,16 +134,18 @@ export async function completeRide(ride_id,driver_id){
 };
 
 // Cancel a ride if and only if status is requested or accepted
-export async function cancelRide(ride_id) {
+export async function cancelRide(ride_id,user_id) {
   try {
     const result = await pool.query(
       `UPDATE rides
        SET status = 'CANCELLED',
-           updated_at = CURRENT_TIMESTAMP
+           updated_at = CURRENT_TIMESTAMP,
+           cancelled_by =$2
        WHERE id = $1
+       AND (driver_id = $2 OR rider_id= $2)
        AND status IN ('REQUESTED', 'ACCEPTED')
        RETURNING *`,
-      [ride_id]
+      [ride_id,user_id]
     );
 
     return result.rows[0];
@@ -151,4 +153,100 @@ export async function cancelRide(ride_id) {
     console.error("Error cancelling the ride:", error);
     throw error;
   }
-}
+};
+
+
+export const getDriverDashboard = async (driver_id) => {
+
+  const query = `
+    SELECT 
+      COUNT(*) AS total_rides,
+
+      COUNT(*) FILTER (
+        WHERE DATE(created_at AT TIME ZONE 'Asia/Kolkata') =
+        DATE(NOW() AT TIME ZONE 'Asia/Kolkata')
+      ) AS today_rides,
+
+      COUNT(*) FILTER (
+        WHERE status = 'COMPLETED'
+      ) AS completed_rides,
+
+      COUNT(*) FILTER (
+        WHERE status = 'STARTED'
+      ) AS active_rides,
+
+      COALESCE(SUM(fare) FILTER (
+        WHERE status = 'COMPLETED'
+        AND DATE(created_at AT TIME ZONE 'Asia/Kolkata') =
+        DATE(NOW() AT TIME ZONE 'Asia/Kolkata')
+      ),0) AS today_earnings
+
+    FROM rides
+    WHERE driver_id = $1
+  `;
+  try {
+    const result = await pool.query(query, [driver_id]);
+
+  return result.rows[0];
+  } catch (error) {
+    console.error("Error fetching dashboard details:", error);
+    throw error;
+  }
+  
+};
+// Get all the recent trips done by a driver with rider's details
+export async function getAllRecentTrips(driver_id) {
+  try {
+    const result = await pool.query(
+      `SELECT rides.id,rides.driver_id,rides.rider_id,
+      rides.pickup_address AS pickuppoint,
+      rides.dropoff_address AS droppoint, rides.fare,
+      users.first_name,users.last_name FROM rides JOIN 
+      users ON rides.rider_id =  users.id WHERE rides.driver_id =  $1`
+      ,[driver_id]
+    );
+    return result.rows;
+  } catch (error) {
+    console.error("Error fetching recent rides:", error);
+    throw error;
+  }
+};
+
+// all the rides which are not assigned to driver and assigned to a particular driver
+export async function getDriverRidesAllDashboard(driver_id){
+  try {
+
+    const availableRides = await pool.query(
+      `SELECT rides.id,rides.driver_id,rides.rider_id,rides.status,
+      rides.pickup_address,rides.dropoff_address,rides.distance_km,rides.fare,
+      users.first_name,users.last_name,users.email,users.mobile
+      FROM rides JOIN 
+      users ON rides.rider_id =  users.id 
+      WHERE rides.status = 'REQUESTED' 
+      AND rides.driver_id IS NULL
+      ORDER BY rides.created_at DESC`
+    );
+
+    const driverRides = await pool.query(
+      `SELECT rides.id,rides.driver_id,rides.rider_id,rides.status,
+      rides.pickup_address,rides.dropoff_address,rides.distance_km,rides.fare,
+      users.first_name,users.last_name,users.email,users.mobile
+      FROM rides JOIN 
+      users ON rides.rider_id =  users.id 
+      WHERE  (rides.driver_id=$1 OR rides.cancelled_by::INT=$1)
+      ORDER BY rides.created_at DESC`,
+      [driver_id]
+    );
+
+    return {
+      availableRides: availableRides.rows,
+      driverRides: driverRides.rows,
+      availableRidesCount:availableRides.rowCount,
+      driverRidesCount:driverRides.rowCount
+    };
+
+  } catch (error) {
+    console.error("Error fetching rides:", error);
+    throw error;
+  }
+};

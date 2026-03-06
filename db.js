@@ -49,6 +49,7 @@ export async function initDB() {
       fare DECIMAL(10,2),
       start_time TIMESTAMP,
       end_time TIMESTAMP,
+      cancelled_by INT,
       created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
       updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     );
