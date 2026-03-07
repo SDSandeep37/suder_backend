@@ -7,7 +7,7 @@ router.get('/',getAllDrivers);
 router.get('/:id',getDriverById);
 router.post('/',becomeDriver);
 router.put('/verify/:id',verifyDriver);
-router.put('/availability/:id', toggleAvailability);
+router.put('/ /:id', toggleAvailability);
 router.put('/location/:id',updateLocation);
 router.put('/:id',updateDriverDetails)
 router.delete('/:id',deleteDriver);

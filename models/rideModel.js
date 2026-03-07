@@ -250,3 +250,82 @@ export async function getDriverRidesAllDashboard(driver_id){
     throw error;
   }
 };
+
+
+//getting all the rides related to a particular user/rider
+export async function getRiderRidesAllDashboard(user_id){
+  try {
+
+    const currentRides = await pool.query(
+      `SELECT rides.id,rides.driver_id,rides.rider_id,rides.status,
+      rides.pickup_address,rides.dropoff_address,rides.distance_km,rides.fare,
+      users.first_name,users.last_name,users.email,users.mobile
+      FROM rides JOIN 
+      users ON rides.rider_id =  users.id 
+      WHERE rides.status IN ('REQUESTED','ACCEPTED','STARTED')
+	    AND users.id = $1
+      ORDER BY rides.created_at DESC`,[user_id]
+    );
+    const startedRides = await pool.query(
+      `SELECT rides.id,rides.driver_id,rides.rider_id,rides.status,
+      rides.pickup_address,rides.dropoff_address,rides.distance_km,rides.fare,
+      users.first_name,users.last_name,users.email,users.mobile
+      FROM rides JOIN 
+      users ON rides.rider_id =  users.id 
+      WHERE rides.status ='STARTED'
+	    AND rides.rider_id = $1
+      ORDER BY rides.created_at DESC`,[user_id]
+    );
+
+    const allRides = await pool.query(
+      `SELECT rides.id,rides.driver_id,rides.rider_id,rides.status,
+      rides.pickup_address,rides.dropoff_address,rides.distance_km,rides.fare,
+      users.first_name,users.last_name,users.email,users.mobile
+      FROM rides JOIN 
+      users ON rides.rider_id =  users.id 
+      WHERE  (rides.rider_id=$1 OR rides.cancelled_by::INT=$1)
+      ORDER BY rides.created_at DESC`,
+      [user_id]
+    );
+    const query = `
+    SELECT 
+      COUNT(*) AS total_rides,
+
+      COUNT(*) FILTER (
+        WHERE DATE(created_at AT TIME ZONE 'Asia/Kolkata') =
+        DATE(NOW() AT TIME ZONE 'Asia/Kolkata')
+      ) AS today_rides,
+
+      COUNT(*) FILTER (
+        WHERE status = 'COMPLETED'
+      ) AS completed_rides,
+
+      COUNT(*) FILTER (
+        WHERE status = 'STARTED'
+      ) AS active_rides,
+
+      COALESCE(SUM(fare) FILTER (
+        WHERE status = 'COMPLETED'
+        AND DATE(created_at AT TIME ZONE 'Asia/Kolkata') =
+        DATE(NOW() AT TIME ZONE 'Asia/Kolkata')
+      ),0) AS today_expenses
+
+    FROM rides
+    WHERE rider_id = $1
+  `;
+  const result = await pool.query(query, [user_id]);
+    return {
+      currentRides: currentRides.rows,
+      allRides: allRides.rows,
+      startedRides: startedRides.rows,
+      currentRidesCount:currentRides.rowCount,
+      allRidesCount:allRides.rowCount,
+      startedRidesCount:startedRides.rowCount,
+      otherRidesCount:result.rows[0]
+    };
+
+  } catch (error) {
+    console.error("Error fetching rides:", error);
+    throw error;
+  }
+};

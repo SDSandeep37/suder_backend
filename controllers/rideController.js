@@ -94,14 +94,14 @@ export const deleteRide = async (req, res) => {
 // Start a ride
 export const startRide= async(req,res) =>{
   const {id} = req.params;
-  const {driver_id} = req.body;
-  if(!id || !driver_id){
+  const {user_id} = req.body;
+  if(!id || !user_id){
     return res.status(400).json({
       error:"Missing ride id or driver id"
     });
   }
   try {
-    const ride =  await Ride.startRide(id,driver_id);
+    const ride =  await Ride.startRide(id,user_id);
     if(!ride){
       return res.status(400).json({
         error:"Error occured while starting a ride"
@@ -119,14 +119,14 @@ export const startRide= async(req,res) =>{
 // Controller function to complete the ride
 export const completeRide = async (req, res) => {
   const { id } = req.params;
-  const { driver_id } = req.body;
+  const { user_id } = req.body;
 
-  if (!id || !driver_id) {
-    return res.status(400).json({ error: "Ride ID and driver_id are required" });
+  if (!id || !user_id) {
+    return res.status(400).json({ error: "Ride ID and user_id are required" });
   }
 
   try {
-    const ride = await Ride.completeRide(id, driver_id);
+    const ride = await Ride.completeRide(id, user_id);
 
     if (!ride) {
       return res.status(400).json({ error: "Ride cannot be completed" });
@@ -170,14 +170,14 @@ export const cancelRide = async (req, res) => {
 // Assigning a ride to driver
 export const assignDriver = async (req, res) => {
   const { id } = req.params;
-  const { driver_id } = req.body;
+  const { user_id } = req.body;
 
-  if (!id || !driver_id) {
+  if (!id || !user_id) {
     return res.status(400).json({ error: "Ride ID and driver_id required" });
   }
 
   try {
-    const ride = await Ride.assignDriver(id, driver_id);
+    const ride = await Ride.assignDriver(id, user_id);
 
     if (!ride) {
       return res.status(409).json({ error: "Ride already accepted" });
@@ -258,6 +258,23 @@ export const getDriverRidesAllDashboardController = async (req, res) => {
     const driver_id = Number(req.params.id);
 
     const data = await Ride.getDriverRidesAllDashboard(driver_id);
+
+    res.status(200).json(data);
+
+  } catch (error) {
+    res.status(500).json({
+      error: "Failed to fetch rides",
+      message: error.message
+    });
+  }
+};
+
+export const getRiderRidesAllDashboardController = async (req, res) => {
+  try {
+
+    const user_id = Number(req.params.id);
+
+    const data = await Ride.getRiderRidesAllDashboard(user_id);
 
     res.status(200).json(data);
 
