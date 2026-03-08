@@ -1,5 +1,7 @@
+// import packages
 import express from 'express';
 import cors from 'cors';
+//import own codes
 import { initDB } from './db.js';
 import userRoutes from './routes/userRoutes.js';
 import rideRoutes from './routes/rideRoutes.js';
@@ -7,6 +9,7 @@ import paymentRoutes from './routes/paymentsRoutes.js';
 import driverRoutes from "./routes/driverRoutes.js";
 
 const app = express();
+
 app.use('/uploads',express.static('uploads'))
 app.use(cors({
   origin: 'http://localhost:3000', // Allow requests from this origin

@@ -19,6 +19,7 @@ export async function syncUserWithDatabase(req, res) {
         ...user,
         isDriver:false
       });
+      return;
     }
      res.status(201).json({
         ...user,

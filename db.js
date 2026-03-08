@@ -32,6 +32,21 @@ export async function initDB() {
       updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     );
   `); 
+   await pool.query(`
+    CREATE TABLE IF NOT EXISTS drivers (
+    id SERIAL PRIMARY KEY,
+    user_id INTEGER UNIQUE REFERENCES users(id) ON DELETE CASCADE,
+    vehicle_number TEXT NOT NULL,
+    license_number TEXT NOT NULL,
+    vehicle_type TEXT NOT NULL,
+    is_verified BOOLEAN DEFAULT false,
+    is_available BOOLEAN DEFAULT false,
+    current_lat DECIMAL(10,8),
+    current_lng DECIMAL(11,8),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    );
+  `);
   await pool.query(`
     CREATE TABLE IF NOT EXISTS rides  (
       id SERIAL PRIMARY KEY,
@@ -61,26 +76,18 @@ export async function initDB() {
       ride_id INT REFERENCES rides(id),
       amount NUMERIC,
       status TEXT,
+      stripe_payment_intent TEXT,
+      currency TEXT DEFAULT 'INR',
+      payment_method TEXT,
+      platform_fee NUMERIC DEFAULT 0,
+      driver_payout NUMERIC DEFAULT 0,
+      receipt_url TEXT,
       created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
       updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 
       );
   `);
-  await pool.query(`
-    CREATE TABLE IF NOT EXISTS drivers (
-    id SERIAL PRIMARY KEY,
-    user_id INTEGER UNIQUE REFERENCES users(id) ON DELETE CASCADE,
-    vehicle_number TEXT NOT NULL,
-    license_number TEXT NOT NULL,
-    vehicle_type TEXT NOT NULL,
-    is_verified BOOLEAN DEFAULT false,
-    is_available BOOLEAN DEFAULT false,
-    current_lat DECIMAL(10,8),
-    current_lng DECIMAL(11,8),
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-    );
-  `);
+ 
   console.log('Database initialized');
 };
  
