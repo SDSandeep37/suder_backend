@@ -20,6 +20,7 @@ app.use(cors({
   allowedHeaders: ['Content-Type', 'Authorization'],
   credentials: true
 }));
+app.options('*', cors()); // handle preflight
 const PORT = process.env.PORT || 3000;
 app.use(express.json());
 // Use user routes
