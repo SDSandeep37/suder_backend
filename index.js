@@ -16,12 +16,12 @@ const allowedOrigins = [
   "https://suder-smart.vercel.app"
 ];
 
-// app.use(cors({
-//   origin: allowedOrigins,
-//   methods: ["GET","POST","PUT","DELETE","OPTIONS"],
-//   allowedHeaders: ["Content-Type","Authorization"],
-//   credentials: true
-// }));
+app.use(cors({
+  origin: "*",
+  methods: ["GET","POST","PUT","DELETE","OPTIONS"],
+  allowedHeaders: ["Content-Type","Authorization"],
+  credentials: true
+}));
 app.use(cors());
 app.options('*', cors()); // important for preflight
 
