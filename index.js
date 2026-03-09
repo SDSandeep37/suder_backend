@@ -39,6 +39,17 @@ app.use('/api/rides', rideRoutes);
 app.use('/api/payments', paymentRoutes);
 app.use('/api/drivers', driverRoutes);
 
+app.use((err, req, res, next) => {
+  console.error("Global error:", err);
+
+  res.header("Access-Control-Allow-Origin", "https://suder-smart.vercel.app");
+  res.header("Access-Control-Allow-Credentials", "true");
+
+  res.status(500).json({
+    error: err.message || "Server error"
+  });
+});
+
 initDB().then(() => {
   app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
