@@ -14,7 +14,7 @@ app.use('/uploads',express.static('uploads'))
 app.use(cors({
   origin:[ 
     'http://localhost:3000',
-    'https://suder-smart.vercel.app/'
+    'https://suder-smart.vercel.app'
   ], // Allow requests from this origin
   methods: ['GET', 'POST', 'PUT', 'DELETE'],
   allowedHeaders: ['Content-Type', 'Authorization'],
