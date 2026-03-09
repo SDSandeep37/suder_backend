@@ -9,20 +9,27 @@ import paymentRoutes from './routes/paymentsRoutes.js';
 import driverRoutes from "./routes/driverRoutes.js";
 
 const app = express();
-
-app.use('/uploads',express.static('uploads'))
-app.use(cors({
-  origin:[ 
-    'http://localhost:3000',
-    'https://suder-smart.vercel.app'
-  ], // Allow requests from this origin
-  methods: ['GET', 'POST', 'PUT', 'DELETE'],
-  allowedHeaders: ['Content-Type', 'Authorization'],
-  credentials: true
-}));
-app.options('*', cors()); // handle preflight
 const PORT = process.env.PORT || 3000;
 app.use(express.json());
+app.use('/uploads',express.static('uploads'))
+const allowedOrigins = [
+  "http://localhost:3000",
+  "https://suder-smart.vercel.app"
+];
+
+app.use(cors({
+  origin: function (origin, callback) {
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error("Not allowed by CORS"));
+    }
+  },
+  credentials: true
+}));
+
+app.options("*", cors());
+
 // Use user routes
 app.use('/api/users', userRoutes);
 // Use ride routes  
